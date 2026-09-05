@@ -45,7 +45,7 @@ export const updateApplications = async (req, res) => {
 
     const isAppIdPresent = await pool.query(
       "select * from applications where id=$1 and user_id=$2",
-      [appId,userID],
+      [appId, userID],
     );
     if (isAppIdPresent.rowCount == 0) {
       return res
@@ -67,6 +67,33 @@ export const updateApplications = async (req, res) => {
     );
 
     res.status(200).json({ data: result.rows[0] });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Something went Wrong " });
+  }
+};
+
+export const deleteApplications = async (req, res) => {
+  try {
+    const { id: appId } = req.params;
+    const userID = req.user.userId;
+    console.log(appId);
+    console.log(userID);
+    const isAppPresen = await pool.query(
+      "select * from applications where id=$1 and user_id=$2",
+      [appId, userID],
+    );
+    if (isAppPresen.rowCount == 0) {
+      return res
+        .status(404)
+        .json({ message: "Unable to find the Application" });
+    }
+
+    const result = await pool.query(
+      "delete  from applications where user_id=$1 and id=$2",
+      [userID, appId],
+    );
+    res.status(200).json({ message: "Application Deleted Successfully" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Something went Wrong " });

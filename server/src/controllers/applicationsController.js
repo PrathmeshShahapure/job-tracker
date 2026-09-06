@@ -1,16 +1,56 @@
 import pool from "../../db/index.js";
 export const getApplications = async (req, res) => {
   try {
+    const { search: searchq, sort: sortq, status: statusq, order: orderq, page: pageq, limit: limitq } = req.query;
+    console.log(searchq, sortq, pageq, statusq);
     const userID = req.user.userId;
     console.log(userID);
 
-    const result = await pool.query(
-      "select * from applications where user_id=$1",
-      [userID],
-    );
+    let Query = `select * from applications where user_id=$1`
+    let values=[userID]
 
+    if (searchq) { 
+      values.push(`%${searchq}%`);
+      Query += ` and ( company_name ilike  $${values.length} 
+                 or    job_title ilike  $${values.length})`;
+    }
+
+    if (statusq) { 
+      values.push(statusq);
+      Query += ` and ( status = $${values.length} )`;
+    }
+    
+    const allowedSortColumns = [
+      "company_name",
+      "job_title",
+      "status",
+      "applied_at",
+      "created_at",
+    ];
+
+    if (sortq && allowedSortColumns.includes(sortq)) {
+      Query += ` ORDER BY ${sortq}`;
+    }
+
+     const page = Number(pageq) || 1;
+     const limit = Number(limitq) || 10;
+
+     const offset = (page - 1) * limit;
+
+     Query += `
+      LIMIT $${values.length + 1}
+      OFFSET $${values.length + 2}
+    `;
+
+     values.push(limit, offset);
+
+     console.log(Query);
+    console.log(values);
+    
+    const result = await pool.query(Query, values);
     res.status(200).json({ data: result.rows });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: "Something went Wrong " });
   }
 };

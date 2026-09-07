@@ -1,4 +1,6 @@
+import { safeParse } from "zod";
 import pool from "../../db/index.js";
+import { appSchema } from "../schema/auth.schema.js";
 export const getApplications = async (req, res) => {
   try {
     const { search: searchq, sort: sortq, status: statusq, order: orderq, page: pageq, limit: limitq } = req.query;
@@ -58,6 +60,12 @@ export const getApplications = async (req, res) => {
 export const createApplications = async (req, res) => {
   try {
     const userID = req.user.userId;
+    const { success, error } = appSchema.safeParse(req.body);
+    if (!success) {
+      return res.status(400).json({
+        message: error.issues[0].message,
+      });
+    }
     const { company_name, job_title, location, status, applied_at, notes } =
       req.body;
     console.log(userID);
@@ -79,6 +87,12 @@ export const updateApplications = async (req, res) => {
     const { id: appId } = req.params;
     const userID = req.user.userId;
     console.log(appId);
+      const { success, error } = appSchema.safeParse(req.body);
+      if (!success) {
+        return res.status(400).json({
+          message: error.issues[0].message,
+        });
+      }
     const { company_name, job_title, location, status, applied_at, notes } =
       req.body;
     console.log(userID);

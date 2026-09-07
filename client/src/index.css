@@ -1,0 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&family=Geomini:wght@200..800&display=swap');
+@import "tailwindcss";
+
+@theme{
+    --font-comic:"comic",cursive;
+}

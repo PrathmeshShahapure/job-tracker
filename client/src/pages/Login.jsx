@@ -6,13 +6,14 @@ import api from "../api/axios.js";
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [err, setErr] = useState("");
+  const navigate = useNavigate();
+  
   const handleForm = (e) => {
     const name = e.target.name;
     const value = e.target.value;
     setFormData({ ...formData, [name]: value });
   };
   console.log(formData);
-  const navigate = useNavigate();
   const token = Cookies.get("token");
   if (token) return <Navigate to="/" />;
   const handleSubmit = async (e) => {
